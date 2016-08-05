@@ -6,6 +6,14 @@
 
 import requests
 from bs4 import BeautifulSoup
+import sys
+
+def safeprint(*s):
+    try:
+        print(' '.join(s).encode('utf8').decode(sys.stdout.encoding))
+    except:
+        pass
+
 url_login = "http://www.ais.tku.edu.tw/elecos/login.aspx"
 url_action = "http://www.ais.tku.edu.tw/elecos/action.aspx"
 headers = {'User-Agent': 'Mozilla/5.0'}
@@ -32,12 +40,12 @@ def login(session,usr,pwd,fail_msg=True,timetable=True):
     r = session.post(url_login,headers=headers,data=login_payload)
     soup = BeautifulSoup(r.content,"html.parser")
     if '.EleCos' in session.cookies.keys():
-        print('\n===== 登陸成功 =====')
-        print(soup.findAll('p')[0].text.replace('\t','').replace('\xa0','').replace(' ',''))
+        safeprint('\n===== 登陸成功 =====')
+        safeprint(soup.findAll('p')[0].text.replace('\t','').replace('\xa0','').replace(' ',''))
         if timetable: print_timetabe(soup)
         return True
-    if fail_msg: print('===== 登陸失敗 =====')
-    if fail_msg: print(s.findAll('tr')[4].findAll('td')[1].text.strip())
+    if fail_msg: safeprint('===== 登陸失敗 =====')
+    if fail_msg: safeprint(s.findAll('tr')[4].findAll('td')[1].text.strip())
     return False
 def action(session,method,cosid):
     cosid = str(cosid)
@@ -46,8 +54,8 @@ def action(session,method,cosid):
     r = session.post(url_action,headers=headers,data=action_payload)
     soup = BeautifulSoup(r.content,"html.parser")
     msg = get_msg(soup)
-    print(">>>> " + ("退選 " if method == "del" else "加選 ") + cosid)
-    print(msg)
+    safeprint(">>>> " + ("退選 " if method == "del" else "加選 ") + cosid)
+    safeprint(msg)
     if msg.startswith("E999"):
         return False
     return soup
@@ -57,17 +65,17 @@ def query(session,cosid):
     action_payload['txtCosEleSeq'] = cosid
     r = session.post(url_action,headers=headers,data=action_payload)
     soup = BeautifulSoup(r.content,"html.parser")
-    print(get_msg(soup))
+    safeprint(get_msg(soup))
     return r
 def get_msg(action_soup):
     return action_soup.findAll('tr')[1].findAll('td')[2].text.strip()
 def print_timetabe(action_soup):
-    print('================== 我的選課 ==================')
+    safeprint('================== 我的選課 ==================')
     try:
         ctds = lambda tds: ' | '.join(tds[:4] + [tds[12]] + [tds[10]] + [tds[4]] + tds[13].split(' '))
         ptd = lambda td: ctds([x.text.strip() for x in td])
         clean = lambda x: x.replace('\t','').replace('\xa0','').strip()
-        [print(r) for r in (ptd(x.findAll('td')) for x in action_soup.findAll('tr')[4:-2])]
+        [safeprint(r) for r in (ptd(x.findAll('td')) for x in action_soup.findAll('tr')[4:-2])]
     except:
         pass
 
@@ -77,37 +85,38 @@ if __name__ == '__main__':
     from time import sleep
 
     def wait_start(runTime, action):
-        startTime = time(*(map(int, runTime.split(':'))))
-        while startTime > datetime.today().time(): # you can add here any additional variable to break loop if necessary
-            sleep(10)# you can change 1 sec interval to any other
+        while runTime > datetime.now():
+            sleep(interval)
         return action()
 
     def fuck_elecos():
         session = requests.Session()
-        for x in range(1,181): # try 180 times
+        for x in range(1,try_times + 1):
             try:
-                print('第 {} 次嘗試登陸'.format(x))
+                safeprint('第 {} 次嘗試登陸'.format(x))
                 if login(session,student_no,password,False,True):
                     break
-            except:
-                pass
+            except Exception as e:
+                safeprint(e)
             sleep(1)
         s = None
         if not '.EleCos' in session.cookies.keys():
-            print('\n========== 嘗試多次登陸失敗, 程序結束 ==========')
+            safeprint('\n========== 嘗試多次登陸失敗, 程序結束 ==========')
         if len(dels):
-            print('\n========== 開始退選({}) =========='.format(len(dels)))
+            safeprint('\n========== 開始退選({}) =========='.format(len(dels)))
             for d in dels:
                 s = action(session,"del",d)
         if len(adds):
-            print('\n========== 開始加選({}) =========='.format(len(adds)))
+            safeprint('\n========== 開始加選({}) =========='.format(len(adds)))
             for a in adds:
                 s = action(session,"add",a)
 
         if s:
             print_timetabe(s)
-        print ('\n========== 任務完成 程序結束 ==========')
+        safeprint('\n========== 任務完成 程序結束 ==========')
 
-    print('[!] 定時 {} 開始, 請不要中途關閉程序.'.format(start_time))
+    start_time = datetime(*start_time)
+    safeprint('Current:',datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    safeprint('[!] The program will start at {} , do NOT abort. 程序.'.format(start_time.strftime("%Y-%m-%d %H:%M:%S")))
     sleep(1)
     wait_start(start_time, lambda: fuck_elecos())
