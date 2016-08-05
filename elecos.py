@@ -10,9 +10,12 @@ import sys
 
 def safeprint(*s):
     try:
-        print(' '.join(s).encode('utf8').decode(sys.stdout.encoding))
+        print(s)
     except:
-        pass
+        try:
+            print(' '.join([str(x) for x in s]).encode('utf8').decode(sys.stdout.encoding))
+        except Exception as e:
+            print(e)
 
 url_login = "http://www.ais.tku.edu.tw/elecos/login.aspx"
 url_action = "http://www.ais.tku.edu.tw/elecos/action.aspx"
