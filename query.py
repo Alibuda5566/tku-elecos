@@ -15,29 +15,29 @@ def query_dept_courses(depts,dept):
     for i in range(len(trs)):
         tr = trs[i]
         tr_data = parse_tr(tr)
-        if tr_data[0] == '' or tr_data[0] == '--':
-            try:
+        try:
+            if len(tr_data) != 0 and (tr_data[0] == '' or tr_data[0] == '--'):
                 c = get_course(tr_data)
                 if not c: continue
                 if c.group == 'P':
                     courses[-1] += c
                 else:
                     courses.append(c)
-            except:
-                pprint(tr_data)
-                raise
+        except:
+            pprint(tr_data)
+            raise
 
     return courses
 
 def get_course(tr_data):
     c = Course(
             grade=int(tr_data[1]),
-            no=tr_data[2].replace('(實習)',''),
+            no=tr_data[2].split('(')[0],
             subject=tr_data[3],
             term=int(tr_data[5]),
             classno=tr_data[6],
             group=tr_data[7],
-            obligatory=(tr_data[8]=='必'),
+            obligatory=(tr_data[8].strip()=='必'),
             credit=int(tr_data[9]),
             name=tr_data[11],
             desc=tr_data[12],
@@ -52,12 +52,14 @@ def parse_tr(tr):
         text = tds[i].text.strip()
         if i == 11:
             parts = text.split('\u3000')
-            result.append(parts[0])
             if len(parts) >= 2:
+                result.append(parts[0])
                 result.append(parts[1])
             else:
+                result.append(text.replace('\u3000',''))
                 result.append('')
-        result.append(text.replace('\u3000',''))
+        else:
+            result.append(text.replace('\u3000',''))
     return result
 
 class AttrDict(dict):

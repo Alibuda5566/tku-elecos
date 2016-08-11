@@ -1,0 +1,54 @@
+.courses_list
+{
+  font-size: 0.8em;
+  margin: 1em;
+}
+.courses_list tr
+{
+  opacity: 0.3;
+}
+.courses_list tr.obligatory
+{
+  opacity: 1;
+}
+.courses_list td
+{
+  margin: 0 0.2em;
+}
+
+.selected-list
+{
+  margin: 1em;
+}
+.selected-list .label
+{
+  display: inline-block;
+  font-size: 0.7em;
+  padding: 0.3em 0.5em;
+  background: #fdfdfd;
+  border-radius: 0.3em;
+  margin: 0.2em;
+}
+.selected-list .label .remove
+{
+  display: inline-block;
+  margin-left: 0.3em;
+  cursor: pointer;
+  opacity: 0.2;
+}
+
+.button
+{
+  cursor: pointer;
+  display: inline-block;
+  font-size: 0.8em;
+  padding: 0.3em 1em;
+  border-radius: 0.3em;
+  border: 1px solid #888;
+  margin: 0.2em;
+  transition: all 0.5 s ease-in-out;
+}
+.button:hover
+{
+  background: rgba(0,0,0,0.1);
+}
