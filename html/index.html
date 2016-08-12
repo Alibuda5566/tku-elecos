@@ -34,6 +34,7 @@
       <table class="courses_list">
           <thead>
             <tr>
+              <th></th>
               <th>序號</th>
               <th>科目</th>
               <th>年級</th>
@@ -44,10 +45,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="course in select_dept[2]" v-if="course.term == select_term" :class="{'obligatory': course.obligatory}">
+            <tr v-for="course in select_dept[2]" v-if="course.term == select_term" :class="{'obligatory': course.obligatory, 'selected': is_selected(course)}">
+              <td class="actions">
+                <div v-if="!is_selected(course)" class="button icon" @click="add_course(course)">+</div>
+              </td>
               <td>${course.no}</td>
               <td>${course.subject}</td>
-              <td>${course.grade}</td>
+              <td>${GRADES[course.grade]}</td>
               <td>${course.name}</td>
               <td>${course.credit}</td>
               <td>${course.teacher}</td>

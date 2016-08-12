@@ -1,19 +1,25 @@
 .courses_list
 {
   font-size: 0.8em;
-  margin: 1em;
+  margin: 0.5em;
+  border: 1px solid #ccc;
+  padding: 0.5em;
 }
-.courses_list tr
+.courses_list tr.obligatory td:not(.actions)
+{
+  color: #84c727;
+}
+.courses_list tr:not(.obligatory) td:not(.actions)
+{
+  color: #888;
+}
+.courses_list tr.selected td:not(.actions)
 {
   opacity: 0.3;
 }
-.courses_list tr.obligatory
-{
-  opacity: 1;
-}
 .courses_list td
 {
-  margin: 0 0.2em;
+  padding: 0 0.5em;
 }
 
 .selected-list
@@ -47,6 +53,10 @@
   border: 1px solid #888;
   margin: 0.2em;
   transition: all 0.5 s ease-in-out;
+}
+.button.icon
+{
+  padding: 0em 0.3em;
 }
 .button:hover
 {
