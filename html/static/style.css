@@ -1,17 +1,18 @@
-.courses_list
+.courses_list, .selected-list, .filters
 {
   font-size: 0.8em;
   margin: 0.5em;
   border: 1px solid #ccc;
   padding: 0.5em;
+  border-radius: 0.3em;
 }
 .courses_list tr.obligatory td:not(.actions)
 {
-  color: #84c727;
+  color: #2784c7;
 }
 .courses_list tr:not(.obligatory) td:not(.actions)
 {
-  color: #888;
+  color: #84c727;
 }
 .courses_list tr.selected td:not(.actions)
 {
@@ -21,15 +22,14 @@
 {
   padding: 0 0.5em;
 }
-
-.selected-list
+.courses_list .actions
 {
-  margin: 1em;
+  text-align: right;
 }
+
 .selected-list .label
 {
   display: inline-block;
-  font-size: 0.7em;
   padding: 0.3em 0.5em;
   background: #fdfdfd;
   border-radius: 0.3em;
@@ -61,4 +61,14 @@
 .button:hover
 {
   background: rgba(0,0,0,0.1);
+}
+
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
 }

@@ -6,11 +6,12 @@
   <link rel="stylesheet" href="static/style.css">
   <script type="text/javascript" src="static/jquery-3.1.0.min.js"></script>
   <script type="text/javascript" src="static/vue.min.js"></script>
+  <script type="text/javascript" src="static/vue.drag-and-drop.js"></script>
   <script type="text/javascript" src="data/courses.json"></script>
 </head>
 <body>
   <div id="vue-root">
-    <div>
+    <div class="filters">
       <select v-model="select_group">
         <option v-for="group in groups" :value="group">${group[1]}</option>
       </select>
@@ -21,17 +22,23 @@
         <option :value="0" selected>第一學期</option>
         <option :value="1">第二學期</option>
       </select>
-      <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term)">添加所有</div>
-      <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term,true)">添加必修</div>
     </div>
     <div class="selected-list">
-      <div class="label" v-for="course in selected">
+      <div class="label" v-for="course in selected" :id="$index" v-drag-and-drop drop="handle_drop">
         ${course.name}
         <div class="remove" @click="remove_course(course)">X</div>
       </div>
+      <div>
+        <div class="button" @click="arrange_selected()">排課</div>
+        <div class="button" @click="clear_selected()">清除所有</div>
+      </div>
     </div>
-    <div v-if="select_group && select_dept && select_term != undefined">
-      <table class="courses_list">
+    <div class="courses_list" v-if="select_group && select_dept && select_term != undefined">
+      <div class="actions">
+        <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term)">添加所有</div>
+        <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term,true)">添加必修</div>
+      </div>
+      <table>
           <thead>
             <tr>
               <th></th>
