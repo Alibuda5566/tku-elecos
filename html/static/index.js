@@ -38,3 +38,43 @@ var vue_inst = new Vue({
     }
   }
 });
+function merge_array() {
+  var result = []
+  $.each(arguments, function(i,item){
+    $.each(item,function(i,e){result.push(e)});
+  });
+  return result;
+}
+function total_classtime(c)
+{
+  return merge_array(c.classtime,c.lab_classtime);
+}
+function conflict(a,b)
+{
+  var result = {result: false, conflicts: []};
+  $.each(total_classtime(a), function(ia,ea) {
+    $.each(total_classtime(b), function(ib,eb){
+      if (ea.index == eb.index)
+      {
+        result.result = true;
+        result.conflicts.push(ea.index);
+      }
+    });
+  });
+  return result;
+}
+function group_conflict(a,b)
+{
+  var result = {result: false, conflicts: []};
+  $.each(a,function(ia,ea){
+    $.each(b,function(ib,eb){
+      var temp = conflict(ea,eb);
+      if (temp.result == true)
+      {
+        result.result = true;
+        result.conflicts = merge_array(result.conflicts, temp.conflicts);
+      }
+    })
+  })
+  return result;
+}
