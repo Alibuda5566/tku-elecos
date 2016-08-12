@@ -22,7 +22,7 @@ var vue_inst = new Vue({
   methods: {
     is_selected: function(e){
       for (var i=0;i<selected_courses.length;i++)
-        if (selected_courses[i].subject == e.subject)
+        if (vue_inst.$data.selected[i].subject == e.subject)
           return true;
       return false;
     },
@@ -34,25 +34,53 @@ var vue_inst = new Vue({
     },
     add_course: function(e) {
       if (!vue_inst.is_selected(e))
-        selected_courses.push(e);
+        vue_inst.$data.selected.push(e);
     },
     remove_course: function(course) {
       var index = selected_courses.indexOf(course);
-      selected_courses.splice(index, 1);
+      vue_inst.$data.selected.splice(index, 1);
     },
     clear_selected: function() {
-      var len = selected_courses;
+      var len = selected_courses.length;
       for (var i=0; i<len; i++)
-        selected_courses.pop();
+        vue_inst.$data.selected.pop();
     },
     handle_drop: function(itemOne, itemTwo) {
       var dummy = selected_courses[itemOne.id];
       selected_courses.$set(itemOne.id, selected_courses[itemTwo.id]);
       selected_courses.$set(itemTwo.id, dummy);
     },
+    arrange_selected: function() {
+      var g = arrange();
+      if (g.length == 0)
+        console.log('No result');
+      else
+        $.each(g,function(i,e){
+          if (i > 10) return ;
+          console.log(i);
+          var credit = 0;
+          $.each(e,function(_,c){
+            console.log(c.no,c.name,stringify(total_classtime(c),'index',','));
+            credit += c.credit;
+          });
+          console.log('合計:' + e.length +'門，' + credit + '學分');
+          console.log('=====================');
+          if (i == 10) console.log('Results more than 10, hidden');
+        })
+    }
   }
 });
 
+function stringify(obj_list,key,spliter) {
+  var str = '';
+  spliter = spliter || '';
+  $.each(obj_list,function(i,e) {
+    if (i != 0)
+      str += spliter;
+    str += e[key];
+  });
+  return str;
+}
 function get_all_course() {
   if (COURSES) return COURSES;
   COURSES = [];
@@ -91,6 +119,36 @@ function merge_array() {
 function total_classtime(c)
 {
   return merge_array(c.classtime,c.lab_classtime);
+}
+function split_list(list) {
+  var groups = [];
+  $.each(list,function(_,e){
+    groups.push([e]);
+  });
+  return groups;
+}
+function arrange_recurse(a,b)
+{
+  var groups = [];
+  $.each(a,function(_,ae){
+    $.each(b,function(_,be){
+      if (!group_conflict(ae,be).result)
+        groups.push(merge_array(ae,be));
+    })
+  });
+  return groups;
+}
+function arrange()
+{
+  var subjects = get_selected_subjects();
+  var groups = split_list(find_by_subject(subjects[0]));
+  for (var i = 1; i < subjects.length; i++)
+  {
+    groups = arrange_recurse(groups,split_list(find_by_subject(subjects[i])));
+    if (groups.length > 100)
+      groups = groups.splice(0,100);
+  }
+  return groups;
 }
 function conflict(a,b)
 {
