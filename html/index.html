@@ -24,9 +24,19 @@
       </select>
     </div>
     <div class="selected-list">
-      <div class="label" v-for="course in selected" :id="$index" v-drag-and-drop drop="handle_drop">
-        ${course.name}
-        <div class="remove" @click="remove_course(course)">X</div>
+      <div class="title" v-if="selected.required.length">R:期望課程（按順序權重）</div>
+      <div class="labels" v-if="selected.required.length">
+        <div class="label" v-for="course in selected.required" :id="$index" v-drag-and-drop drop="handle_drop">
+          ${course.name}
+          <div class="remove" @click="remove_course(course,selected.required)">X</div>
+        </div>
+      </div>
+      <div class="title" v-if="selected.optional.length">O:可選課程（按順序權重）</div>
+      <div class="labels" v-if="selected.optional.length">
+        <div class="label" v-for="course in selected.optional" :id="$index" v-drag-and-drop drop="handle_drop">
+          ${course.name}
+          <div class="remove" @click="remove_course(course,selected.optional)">X</div>
+        </div>
       </div>
       <div>
         <div class="button" @click="arrange_selected()">排課</div>
@@ -48,13 +58,14 @@
               <th>名稱</th>
               <th>學分</th>
               <th>教師</th>
-              <th>實習</th>
+              <th>課時</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="course in select_dept[2]" v-if="course.term == select_term" :class="{'obligatory': course.obligatory, 'selected': is_selected(course)}">
               <td class="actions">
-                <div v-if="!is_selected(course)" class="button icon" @click="add_course(course)">+</div>
+                <div :class="{hidden:is_selected(course,selected.required)}" class="button icon" @click="add_course(course,selected.required)">r</div>
+                <div :class="{hidden:is_selected(course,selected.optional)}" class="button icon" @click="add_course(course,selected.optional)">o</div>
               </td>
               <td>${course.no}</td>
               <td>${course.subject}</td>
@@ -62,10 +73,8 @@
               <td>${course.name}</td>
               <td>${course.credit}</td>
               <td>${course.teacher}</td>
-              <td>${course.has_lab? course.lab_classtime.length :''}</td>
               <td>
-                <span v-for="ct in course.classtime" style="margin:0 0.3em">${ct.index}</span>
-                <span v-for="ct in course.lab_classtime" style="opacity:0.5;margin:0 0.3em">*${ct.index}</span>
+                <span v-for="ct in course.classtime" style="margin:0 0.3em" :style="{opacity:ct.lab?0.5:1}">${ct.index}</span>
               </td>
             </tr>
           </tbody>

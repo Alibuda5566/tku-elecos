@@ -27,14 +27,26 @@
   text-align: right;
 }
 
+.selected-list .labels
+{
+  margin-bottom: 0.7em;
+  font-size: 0.8em;
+}
 .selected-list .label
 {
   display: inline-block;
   padding: 0.3em 0.5em;
-  background: #fdfdfd;
+  background: #fcfcfc;
   border-radius: 0.3em;
   margin: 0.2em;
+  border: 1px solid rgba(0,0,0,0.05);
 }
+.selected-list .title
+{
+  color: #948332;
+  font-weight: bold;
+}
+
 .selected-list .label .remove
 {
   display: inline-block;
@@ -71,4 +83,10 @@
   /* Required to make elements draggable in old WebKit */
   -khtml-user-drag: element;
   -webkit-user-drag: element;
+}
+
+.hidden
+{
+  opacity: 0;
+  pointer-events: none;
 }

@@ -16,36 +16,64 @@ var vue_inst = new Vue({
   el: '#vue-root',
   data: {
     groups : data,
-    selected : selected_courses,
+    selected : {
+      required: [],
+      optional: [],
+      all: []
+    },
     GRADES: GRADES
   },
   methods: {
-    is_selected: function(e){
-      for (var i=0;i<selected_courses.length;i++)
-        if (vue_inst.$data.selected[i].subject == e.subject)
+    is_selected: function(e,type){
+      type = type || vue_inst.$data.selected.all;
+      for (var i=0;i<type.length;i++)
+        if (type[i].subject == e.subject)
           return true;
       return false;
     },
-    add_dept: function (dept_data,term, obligatory) {
+    add_dept: function (dept_data,term,obligatory) {
       $.each(dept_data,function(i,e) {
         if (e.term == term && (obligatory === undefined || e.obligatory == obligatory))
           vue_inst.add_course(e);
       });
     },
-    add_course: function(e) {
-      if (!vue_inst.is_selected(e))
-        vue_inst.$data.selected.push(e);
+    add_course: function(e,type) {
+      type = type || vue_inst.$data.selected.required;
+      if (type != vue_inst.$data.selected.all)
+        vue_inst.remove_course(e);
+      type.push(e);
+      if (type != vue_inst.$data.selected.all)
+        vue_inst.add_course(e,vue_inst.$data.selected.all);
     },
-    remove_course: function(course) {
-      var index = selected_courses.indexOf(course);
-      vue_inst.$data.selected.splice(index, 1);
+    remove_course: function(course,type) {
+      if (!type)
+      {
+        vue_inst.remove_course(course,vue_inst.$data.selected.required);
+        vue_inst.remove_course(course,vue_inst.$data.selected.optional);
+        vue_inst.remove_course(course,vue_inst.$data.selected.all);
+      }
+      else {
+        var index = type.indexOf(course);
+        if (index != -1)
+          type.splice(index, 1);
+        if (type != vue_inst.$data.selected.all)
+          vue_inst.remove_course(course,vue_inst.$data.selected.all);
+      }
     },
-    clear_selected: function() {
-      var len = selected_courses.length;
-      for (var i=0; i<len; i++)
-        vue_inst.$data.selected.pop();
+    clear_selected: function(type) {
+      if (!type) {
+        vue_inst.clear_selected(vue_inst.$data.selected.all);
+        vue_inst.clear_selected(vue_inst.$data.selected.required);
+        vue_inst.clear_selected(vue_inst.$data.selected.optional);
+      }
+      else {
+        var len = type.length;
+        for (var i=0; i<len; i++)
+          type.pop();
+      }
     },
     handle_drop: function(itemOne, itemTwo) {
+      // TODO: need fix
       var dummy = selected_courses[itemOne.id];
       selected_courses.$set(itemOne.id, selected_courses[itemTwo.id]);
       selected_courses.$set(itemTwo.id, dummy);
@@ -60,7 +88,7 @@ var vue_inst = new Vue({
           console.log(i);
           var credit = 0;
           $.each(e,function(_,c){
-            console.log(c.no,c.name,stringify(total_classtime(c),'index',','));
+            console.log(c.no,c.name,stringify(c.classtime,'index',','));
             credit += c.credit;
           });
           console.log('合計:' + e.length +'門，' + credit + '學分');
@@ -102,9 +130,10 @@ function find_by_subject(subject)
   });
   return r;
 }
-function get_selected_subjects() {
+function get_selected_subjects(type) {
+  type = type || vue_inst.$data.selected.all;
   var r = [];
-  $.each(selected_courses,function(_,e) {
+  $.each(type,function(_,e) {
     r.push(e.subject);
   });
   return r;
@@ -115,10 +144,6 @@ function merge_array() {
     $.each(item,function(i,e){result.push(e)});
   });
   return result;
-}
-function total_classtime(c)
-{
-  return merge_array(c.classtime,c.lab_classtime);
 }
 function split_list(list) {
   var groups = [];
@@ -144,36 +169,39 @@ function arrange()
   var groups = split_list(find_by_subject(subjects[0]));
   for (var i = 1; i < subjects.length; i++)
   {
-    groups = arrange_recurse(groups,split_list(find_by_subject(subjects[i])));
+    groups = arrange_recurse(groups,split_list(find_by_subject(subjects[i])),true);
+    //TODO: temporary reduce time cost
     if (groups.length > 100)
       groups = groups.splice(0,100);
   }
   return groups;
 }
-function conflict(a,b)
+function conflict(a,b,simple)
 {
   var result = {result: false, conflicts: []};
-  $.each(total_classtime(a), function(ia,ea) {
-    $.each(total_classtime(b), function(ib,eb){
+  $.each(a.classtime, function(ia,ea) {
+    $.each(b.classtime, function(ib,eb){
       if (ea.index == eb.index)
       {
         result.result = true;
-        result.conflicts.push(ea.index);
+        if (!simple)
+          result.conflicts.push(ea.index);
       }
     });
   });
   return result;
 }
-function group_conflict(a,b)
+function group_conflict(a,b,simple)
 {
   var result = {result: false, conflicts: []};
   $.each(a,function(ia,ea){
     $.each(b,function(ib,eb){
-      var temp = conflict(ea,eb);
+      var temp = conflict(ea,eb,simple);
       if (temp.result == true)
       {
         result.result = true;
-        result.conflicts = merge_array(result.conflicts, temp.conflicts);
+        if (!simple)
+          result.conflicts = merge_array(result.conflicts, temp.conflicts);
       }
     })
   })

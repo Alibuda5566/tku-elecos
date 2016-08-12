@@ -84,11 +84,6 @@ class Course(AttrDict):
         self.teacher = teacher
         self.classtime = classtime
         self.has_lab = False
-        self.lab_classtime = []
-
-    @property
-    def total_classtime(self):
-        return sorted(list(self.classtime) + self.lab_classtime,key=lambda x:x.index)
 
     def __iadd__(self,other):
         if not self.subject == other.subject:
@@ -98,7 +93,9 @@ class Course(AttrDict):
         if self.no == '':
             self.no = other.no
         self.has_lab = True
-        self.lab_classtime = other.classtime
+        for ct in other.classtime:
+            ct.lab = True
+            self.classtime.append(ct)
         return self
 
 class ClassTime(AttrDict):
@@ -107,6 +104,7 @@ class ClassTime(AttrDict):
         self.lesson = lesson
         self.room = room
         self.index = week*100 + lesson
+        self.lab = False
 
 def get_classes(classes):
     result = []
