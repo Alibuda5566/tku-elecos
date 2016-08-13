@@ -19,7 +19,8 @@ var vue_inst = new Vue({
     selected : {
       required: [],
       optional: [],
-      all: []
+      all: [],
+      arranged: []
     },
     GRADES: GRADES
   },
@@ -95,7 +96,19 @@ var vue_inst = new Vue({
           console.log('=====================');
           if (i == 10) console.log('Results more than 10, hidden');
         })
-    }
+      Vue.set(vue_inst.$data,'arranged',g);
+    },
+    index_filter: function(group, index) {
+      var r = [];
+      $.each(group,function(_,l) {
+        $.each(l.classtime,function(_,ct) {
+          if (ct.index == index)
+            r.push(l);
+        })
+      })
+      return r;
+    },
+    hashcolor: hashStringToColor,
   }
 });
 
@@ -206,4 +219,20 @@ function group_conflict(a,b,simple)
     })
   })
   return result;
+}
+
+function djb2(str){
+  var hash = 5381;
+  for (var i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
+  }
+  return hash;
+}
+
+function hashStringToColor(str) {
+  var hash = djb2(str.toString());
+  var r = (hash & 0xFF0000) >> 16;
+  var g = (hash & 0x00FF00) >> 8;
+  var b = hash & 0x0000FF;
+  return "#" + ("0" + r.toString(16)).substr(-2) + ("0" + g.toString(16)).substr(-2) + ("0" + b.toString(16)).substr(-2);
 }

@@ -43,6 +43,26 @@
         <div class="button" @click="clear_selected()">清除所有</div>
       </div>
     </div>
+    <div v-if="arranged.length" class="arranged-list">
+      <select v-model="selected_arranged">
+        <option v-for="a in arranged" :value="a">${$index}</option>
+      </select>
+      <div v-if="selected_arranged">
+        <table>
+          <thead><tr><th></th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th></tr></thead>
+          <tbody>
+            <tr v-for="i in 15">
+              <th>${i+1}</th>
+              <td v-for="w in 7" :index="(w+1)*100+i+1">
+                <div class="lesson" v-for="l in index_filter(selected_arranged,(w+1)*100+i+1)" :style={color:hashcolor(l.no)}>
+                  ${l.name}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
     <div class="courses_list" v-if="select_group && select_dept && select_term != undefined">
       <div class="actions">
         <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term)">添加所有</div>
