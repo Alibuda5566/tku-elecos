@@ -6,29 +6,6 @@ URL_QUERY_COURSES = "http://esquery.tku.edu.tw/acad/query_result.asp"
 URL_QUERY_DEPTS = "http://esquery.tku.edu.tw/acad/query.asp"
 WEEKDAYS = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'日':7}
 
-def query_dept_courses(depts,dept):
-    r = rq.post(URL_QUERY_COURSES,dict(func='go',R1='1',depts=depts,sgn1='-',dept=dept,level='999'))
-    r.encoding = 'Big5'
-    s = bs(r.text,"lxml")
-    trs = s.findAll('table')[2].findChildren('tr')
-    courses = []
-    for i in range(len(trs)):
-        tr = trs[i]
-        tr_data = parse_tr(tr)
-        try:
-            if len(tr_data) != 0 and (tr_data[0] == '' or tr_data[0] == '--'):
-                c = get_course(tr_data)
-                if not c: continue
-                if c.group == 'P':
-                    courses[-1] += c
-                else:
-                    courses.append(c)
-        except:
-            pprint(tr_data)
-            raise
-
-    return courses
-
 def get_course(tr_data):
     c = Course(
             grade=int(tr_data[1]),
@@ -121,6 +98,35 @@ def get_classes(classes):
             pass
     return sorted(result,key=lambda x: x.index)
 
+def query_dept_courses(depts,dept):
+    return query_courses(dict(func='go',R1='1',depts=depts,sgn1='-',dept=dept,level='999'))
+
+def query_other_courses(other,others):
+    return query_courses(dict(func='go',R1='5',others=others,sgn2='-',other=other))
+
+def query_courses(payload):
+    r = rq.post(URL_QUERY_COURSES,payload)
+    r.encoding = 'Big5'
+    s = bs(r.text,"lxml")
+    trs = s.findAll('table')[2].findChildren('tr')
+    courses = []
+    for i in range(len(trs)):
+        tr = trs[i]
+        tr_data = parse_tr(tr)
+        try:
+            if len(tr_data) != 0 and (tr_data[0] == '' or tr_data[0] == '--'):
+                c = get_course(tr_data)
+                if not c: continue
+                if c.group == 'P':
+                    courses[-1] += c
+                else:
+                    courses.append(c)
+        except:
+            pprint(tr_data)
+            raise
+
+    return courses
+
 def get_dept_groups():
     r = rq.get(URL_QUERY_DEPTS)
     r.encoding = 'Big5'
@@ -134,9 +140,32 @@ def get_depts(dept_group):
     s = bs(r.text,"lxml")
     return [[x['value'],x.text] for x in s.find(id='dept').findAll('option')]
 
-def get_all_course(depts = None):
+def get_other_groups():
+    r = rq.get(URL_QUERY_DEPTS)
+    r.encoding = 'Big5'
+    s = bs(r.text,"lxml")
+    depts = [[x['value'],x.text,get_others(x['value'])] for x in s.find(attrs={'name':'other'}).findAll('option')]
+    return depts
+
+def get_others(other_group):
+    r = rq.get(URL_QUERY_DEPTS,dict(R1='5',other=other_group.encode('big5')))
+    r.encoding = 'Big5'
+    s = bs(r.text,"lxml")
+    return [[x['value'],x.text] for x in s.find(attrs={'name':'others'}).findAll('option')]
+
+def get_all_course(depts = None, others = None):
     if depts == None:
         depts = get_dept_groups()
+    if others == None:
+        others = get_other_groups()
+
+    for group in others:
+        for dept in group[2]:
+            print(group[1],dept[1])
+            courses = query_other_courses(group[0],dept[0])
+            if len(dept) >= 3:
+                dept[2] = courses
+            dept.append(courses)
     for group in depts:
         for dept in group[2]:
             print(group[1],dept[1])
@@ -144,4 +173,4 @@ def get_all_course(depts = None):
             if len(dept) >= 3:
                 dept[2] = courses
             dept.append(courses)
-    return depts
+    return depts + others
