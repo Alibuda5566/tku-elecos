@@ -8,7 +8,6 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 from   termcolor import colored, cprint
-import schedule
 import time
 
 def safeprint(*args, color=None, back=None, attrs=None, **kwargs):
@@ -41,19 +40,25 @@ __EVENTVALIDATION = "/wEWCAKZu8TqAgKsvM32BgKMk4HYDwKLk6XGBQKft6B4AuKZlo8DAr/Bm5Q
 txtCosEleSeq = ""
 )
 
-def login(session,usr,pwd,fail_msg=True,timetable=True):
+def login(session,usr,pwd,showmsg=True,timetable=True):
     login_payload['txtStuNo'] =usr
     login_payload['txtPSWD']  =pwd
     r = session.post(url_login,headers=headers,data=login_payload)
-    soup = BeautifulSoup(r.content,"html.parser")
     if '.EleCos' in session.cookies.keys():
         safeprint('\n===== 登陸成功 =====', color='green')
-        safeprint(soup.findAll('p')[0].text.replace('\t','').replace('\xa0','').replace(' ',''))
-        if timetable: print_timetabe(soup)
-        return True
-    if fail_msg: safeprint('===== 登陸失敗 =====', color='red')
-    if fail_msg: safeprint(s.findAll('tr')[4].findAll('td')[1].text.strip())
-    return False
+        if timetable:
+            soup = BeautifulSoup(r.content,"html.parser")
+            safeprint(soup.findAll('p')[0].text.replace('\t','').replace('\xa0','').replace(' ',''))
+            print_timetabe(soup)
+        return True, ''
+    try:
+        soup = BeautifulSoup(r.content,"html.parser")
+        msg = soup.findAll('tr')[4].findAll('td')[1].text.strip()
+    except Exception as e:
+        msg = str(e)
+    if showmsg: safeprint('===== 登陸失敗 =====', color='red')
+    if showmsg: safeprint(msg)
+    return False, msg
 
 def action(session,method,cosid):
     cosid = str(cosid)
@@ -96,11 +101,13 @@ def fuck_elecos(student_no,password,adds=[],dels=[],try_times=180,login_interval
     for x in range(1,try_times + 1):
         try:
             safeprint('第 {}/{} 次嘗試登陸'.format(x,try_times), color='cyan', end='')
-            if login(session,student_no,password,False,True):
-                safeprint(' 成功 ', color='green')
+            result, msg = login(session,student_no,password,False,True)
+            if result:
+                safeprint(' [成功] ', color='green')
                 break
             else:
-                safeprint(' 失敗 ', color='yellow')
+                safeprint(' [失敗] ', color='red', end='')
+                safeprint(msg, color='yellow')
         except Exception as e:
             safeprint(e)
         time.sleep(login_interval)
@@ -124,12 +131,16 @@ if __name__ == '__main__':
     import configs as cfg
     from datetime import datetime
 
+    fuck = lambda: fuck_elecos(cfg.student_no,cfg.password,cfg.adds,cfg.dels,cfg.try_times,cfg.login_interval)
     def wait_start(runTime, action):
         while runTime > datetime.now():
             time.sleep(cfg.schedule_interval)
         return action()
 
     start_time = datetime(*cfg.start_time)
-    safeprint('[#] 當前時間', datetime.now().strftime("%Y-%m-%d %H:%M:%S"), color='cyan')
-    safeprint('[!] 程式將在 {} 執行，請勿關閉程式。'.format(start_time.strftime("%Y-%m-%d %H:%M:%S")), color='yellow')
-    wait_start(start_time, lambda: fuck_elecos(cfg.student_no,cfg.password,cfg.adds,cfg.dels,cfg.try_times,cfg.login_interval))
+    if start_time > datetime.now():
+        safeprint('[#] 當前時間', datetime.now().strftime("%Y-%m-%d %H:%M:%S"), color='cyan')
+        safeprint('[!] 程式將在 {} 執行，請勿關閉程式。'.format(start_time.strftime("%Y-%m-%d %H:%M:%S")), color='yellow')
+        wait_start(start_time, fuck)
+    else:
+        fuck()
