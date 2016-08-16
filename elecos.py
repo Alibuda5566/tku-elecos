@@ -7,15 +7,16 @@
 import requests
 from bs4 import BeautifulSoup
 import sys
+from   termcolor import colored, cprint
 
-def safeprint(*s):
+def safeprint(*args, color=None, back=None, attrs=None, **kwargs):
     try:
-        print(*s)
+        cprint(' '.join([str(x) for x in args]), color, back, attrs=attrs, **kwargs)
     except:
         try:
-            print(' '.join([str(x) for x in s]).encode('utf8').decode(sys.stdout.encoding))
+            print(' '.join([str(x) for x in args]).encode('utf8').decode(sys.stdout.encoding), **kwargs)
         except Exception as e:
-            print('---- Unable to Print ----')
+            print(e)
 
 url_login = "http://www.ais.tku.edu.tw/elecos/login.aspx"
 url_action = "http://www.ais.tku.edu.tw/elecos/action.aspx"
@@ -37,19 +38,21 @@ __VIEWSTATEGENERATOR = "2E66DAD8",
 __EVENTVALIDATION = "/wEWCAKZu8TqAgKsvM32BgKMk4HYDwKLk6XGBQKft6B4AuKZlo8DAr/Bm5QOAqbgzZ0J7U1LWr1/0YV3UKJOU8cINfwIO00=",
 txtCosEleSeq = ""
 )
+
 def login(session,usr,pwd,fail_msg=True,timetable=True):
     login_payload['txtStuNo'] =usr
     login_payload['txtPSWD']  =pwd
     r = session.post(url_login,headers=headers,data=login_payload)
     soup = BeautifulSoup(r.content,"html.parser")
     if '.EleCos' in session.cookies.keys():
-        safeprint('\n===== Login Success =====')
+        safeprint('\n===== 登陸成功 =====', color='green')
         safeprint(soup.findAll('p')[0].text.replace('\t','').replace('\xa0','').replace(' ',''))
         if timetable: print_timetabe(soup)
         return True
-    if fail_msg: safeprint('===== Login Failed =====')
+    if fail_msg: safeprint('===== 登陸失敗 =====', color='red')
     if fail_msg: safeprint(s.findAll('tr')[4].findAll('td')[1].text.strip())
     return False
+
 def action(session,method,cosid):
     cosid = str(cosid)
     action_payload['__EVENTTARGET'] = "btnDel" if method == "del" else "btnAdd"
@@ -57,11 +60,12 @@ def action(session,method,cosid):
     r = session.post(url_action,headers=headers,data=action_payload)
     soup = BeautifulSoup(r.content,"html.parser")
     msg = get_msg(soup)
-    safeprint(">>>> " + ("Del " if method == "del" else "Add ") + cosid)
+    safeprint(">>>> " + ("退選 " if method == "del" else "加選 ") + cosid)
     safeprint(msg)
     if msg.startswith("E999"):
         return False
     return soup
+
 def query(session,cosid):
     cosid = str(cosid)
     action_payload['__EVENTTARGET'] = "btnOffer"
@@ -70,10 +74,12 @@ def query(session,cosid):
     soup = BeautifulSoup(r.content,"html.parser")
     safeprint(get_msg(soup))
     return r
+
 def get_msg(action_soup):
     return action_soup.findAll('tr')[1].findAll('td')[2].text.strip()
+
 def print_timetabe(action_soup):
-    safeprint('================== My Elecos ==================')
+    safeprint('================== 我的選課 ==================')
     try:
         ctds = lambda tds: ' | '.join(tds[:4] + [tds[12]] + [tds[10]] + [tds[4]] + tds[13].split(' '))
         ptd = lambda td: ctds([x.text.strip() for x in td])
@@ -81,6 +87,33 @@ def print_timetabe(action_soup):
         [safeprint(r) for r in (ptd(x.findAll('td')) for x in action_soup.findAll('tr')[4:-2])]
     except:
         pass
+
+def fuck_elecos():
+    safeprint('=== 程序開始 ===', color='green')
+    session = requests.Session()
+    for x in range(1,try_times + 1):
+        try:
+            safeprint('第 {}/{} 次嘗試登陸'.format(x,try_times), color='yellow')
+            if login(session,student_no,password,False,True):
+                break
+        except Exception as e:
+            safeprint(e)
+        sleep(1)
+    s = None
+    if not '.EleCos' in session.cookies.keys():
+        safeprint('\n========== 嘗試多次登陸失敗, 程序結束 ==========', color='white', back='on_red')
+    if len(dels):
+        safeprint('\n========== 開始退選({}) =========='.format(len(dels)), back='on_yellow')
+        for d in dels:
+            s = action(session,"del",d)
+    if len(adds):
+        safeprint('\n========== 開始加選({}) =========='.format(len(adds)), back='on_yellow')
+        for a in adds:
+            s = action(session,"add",a)
+
+    if s:
+        print_timetabe(s)
+    safeprint('\n========== 任務完成 程序結束 ==========', back='on_green')
 
 if __name__ == '__main__':
     from configs import *
@@ -92,34 +125,9 @@ if __name__ == '__main__':
             sleep(interval)
         return action()
 
-    def fuck_elecos():
-        session = requests.Session()
-        for x in range(1,try_times + 1):
-            try:
-                safeprint('[{}] Trys'.format(x))
-                if login(session,student_no,password,False,True):
-                    break
-            except Exception as e:
-                safeprint(e)
-            sleep(1)
-        s = None
-        if not '.EleCos' in session.cookies.keys():
-            safeprint('\n========== Failed too many times, Exiting ==========')
-        if len(dels):
-            safeprint('\n========== Start Deleting({}) =========='.format(len(dels)))
-            for d in dels:
-                s = action(session,"del",d)
-        if len(adds):
-            safeprint('\n========== Start Adding({}) =========='.format(len(adds)))
-            for a in adds:
-                s = action(session,"add",a)
-
-        if s:
-            print_timetabe(s)
-        safeprint('\n========== Task Complete, Exiting ==========')
 
     start_time = datetime(*start_time)
-    safeprint('Current:',datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    safeprint('[!] The program will start at {} , do NOT abort.'.format(start_time.strftime("%Y-%m-%d %H:%M:%S")))
+    safeprint('當前時間：',datetime.now().strftime("%Y-%m-%d %H:%M:%S"), color='cyan')
+    safeprint('[!] 程式將在 {} 執行，請勿關閉程式。'.format(start_time.strftime("%Y-%m-%d %H:%M:%S")), color='yellow')
     sleep(1)
     wait_start(start_time, lambda: fuck_elecos())
