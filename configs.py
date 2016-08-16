@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 try_times = 180
-interval = 10
 start_time = (2016,8,1,12,30)
+schedule_interval = 1
+login_interval = 0.3
 student_no = ""
 password = ""
 

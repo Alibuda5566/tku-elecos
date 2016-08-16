@@ -8,6 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 from   termcolor import colored, cprint
+import schedule
+import time
 
 def safeprint(*args, color=None, back=None, attrs=None, **kwargs):
     try:
@@ -60,7 +62,7 @@ def action(session,method,cosid):
     r = session.post(url_action,headers=headers,data=action_payload)
     soup = BeautifulSoup(r.content,"html.parser")
     msg = get_msg(soup)
-    safeprint(">>>> " + ("退選 " if method == "del" else "加選 ") + cosid)
+    safeprint(">>>> " + ("退選 " if method == "del" else "加選 ") + cosid, back='on_yellow')
     safeprint(msg)
     if msg.startswith("E999"):
         return False
@@ -88,17 +90,20 @@ def print_timetabe(action_soup):
     except:
         pass
 
-def fuck_elecos():
-    safeprint('=== 程序開始 ===', color='green')
+def fuck_elecos(student_no,password,adds=[],dels=[],try_times=180,login_interval=0.3):
+    safeprint('=== 程序開始', datetime.now().strftime("%Y-%m-%d %H:%M:%S"), '===', color='green')
     session = requests.Session()
     for x in range(1,try_times + 1):
         try:
-            safeprint('第 {}/{} 次嘗試登陸'.format(x,try_times), color='yellow')
+            safeprint('第 {}/{} 次嘗試登陸'.format(x,try_times), color='cyan', end='')
             if login(session,student_no,password,False,True):
+                safeprint(' 成功 ', color='green')
                 break
+            else:
+                safeprint(' 失敗 ', color='yellow')
         except Exception as e:
             safeprint(e)
-        sleep(1)
+        time.sleep(login_interval)
     s = None
     if not '.EleCos' in session.cookies.keys():
         safeprint('\n========== 嘗試多次登陸失敗, 程序結束 ==========', color='white', back='on_red')
@@ -116,18 +121,15 @@ def fuck_elecos():
     safeprint('\n========== 任務完成 程序結束 ==========', back='on_green')
 
 if __name__ == '__main__':
-    from configs import *
-    from datetime import datetime, time
-    from time import sleep
+    import configs as cfg
+    from datetime import datetime
 
     def wait_start(runTime, action):
         while runTime > datetime.now():
-            sleep(interval)
+            time.sleep(cfg.schedule_interval)
         return action()
 
-
-    start_time = datetime(*start_time)
-    safeprint('當前時間：',datetime.now().strftime("%Y-%m-%d %H:%M:%S"), color='cyan')
+    start_time = datetime(*cfg.start_time)
+    safeprint('[#] 當前時間', datetime.now().strftime("%Y-%m-%d %H:%M:%S"), color='cyan')
     safeprint('[!] 程式將在 {} 執行，請勿關閉程式。'.format(start_time.strftime("%Y-%m-%d %H:%M:%S")), color='yellow')
-    sleep(1)
-    wait_start(start_time, lambda: fuck_elecos())
+    wait_start(start_time, lambda: fuck_elecos(cfg.student_no,cfg.password,cfg.adds,cfg.dels,cfg.try_times,cfg.login_interval))
