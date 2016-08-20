@@ -80,7 +80,7 @@ def query(session,cosid):
     r = session.post(url_action,headers=headers,data=action_payload)
     soup = BeautifulSoup(r.content,"html.parser")
     safeprint(get_msg(soup))
-    return r
+    return soup
 
 def get_msg(action_soup):
     return action_soup.findAll('tr')[1].findAll('td')[2].text.strip()
