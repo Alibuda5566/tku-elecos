@@ -16,13 +16,23 @@ var vue_inst = new Vue({
   el: '#vue-root',
   data: {
     groups : data,
-    selected : {
+    selected : (storage.fetch() || {
       required: [],
       optional: [],
+      confirmed: [],
       all: [],
       arranged: []
-    },
+    }),
     GRADES: GRADES
+  },
+  watch:
+  {
+    'selected': {
+      handler: function(val){
+        storage.save(val);
+      },
+      deep: true
+    }
   },
   methods: {
     is_selected: function(e,type){
@@ -51,6 +61,7 @@ var vue_inst = new Vue({
       {
         vue_inst.remove_course(course,vue_inst.$data.selected.required);
         vue_inst.remove_course(course,vue_inst.$data.selected.optional);
+        vue_inst.remove_course(course,vue_inst.$data.selected.confirmed);
         vue_inst.remove_course(course,vue_inst.$data.selected.all);
       }
       else {
@@ -66,6 +77,7 @@ var vue_inst = new Vue({
         vue_inst.clear_selected(vue_inst.$data.selected.all);
         vue_inst.clear_selected(vue_inst.$data.selected.required);
         vue_inst.clear_selected(vue_inst.$data.selected.optional);
+        vue_inst.clear_selected(vue_inst.$data.selected.confirmed);
       }
       else {
         var len = type.length;
@@ -73,15 +85,24 @@ var vue_inst = new Vue({
           type.pop();
       }
     },
-    handle_drop: function(itemOne, itemTwo) {
+    handle_drop: function(itemOne, itemTwo, type) {
       // TODO: need fix
-      var dummy = selected_courses[itemOne.id];
-      selected_courses.$set(itemOne.id, selected_courses[itemTwo.id]);
-      selected_courses.$set(itemTwo.id, dummy);
+      var dummy = type[itemOne.id];
+      type.$set(itemOne.id, type[itemTwo.id]);
+      type.$set(itemTwo.id, dummy);
+    },
+    handle_drop_confirmed: function(itemOne, itemTwo) {
+      this.handle_drop(itemOne, itemTwo, vue_inst.$data.selected.confirmed);
+    },
+    handle_drop_required: function(itemOne, itemTwo) {
+      this.handle_drop(itemOne, itemTwo, vue_inst.$data.selected.required);
+    },
+    handle_drop_optional: function(itemOne, itemTwo) {
+      this.handle_drop(itemOne, itemTwo, vue_inst.$data.selected.optional);
     },
     arrange_selected: function() {
       var g = arrange();
-      if (g.length == 0)
+      /*if (g.length == 0)
         console.log('No result');
       else
         $.each(g,function(i,e){
@@ -95,7 +116,7 @@ var vue_inst = new Vue({
           console.log('合計:' + e.length +'門，' + credit + '學分');
           console.log('=====================');
           if (i == 10) console.log('Results more than 10, hidden');
-        })
+        })*/
       Vue.set(vue_inst.$data,'arranged',g);
     },
     index_filter: function(group, index) {
@@ -108,8 +129,16 @@ var vue_inst = new Vue({
       })
       return r;
     },
-    hashcolor: hashStringToColor,
-  }
+    count_credit: function(data) {
+      var count = 0;
+      var i = data.length;
+      while (i--) {
+        count += data[i].credit;
+      }
+      return count;
+    },
+    hashcolor: hashStringToColor
+  },
 });
 
 function stringify(obj_list,key,spliter) {
@@ -147,6 +176,16 @@ function get_selected_subjects(type) {
   type = type || vue_inst.$data.selected.all;
   var r = [];
   $.each(type,function(_,e) {
+    var i = e.classtime.length;
+    while(i--)
+    {
+      if (!vue_inst.$data.selected.arrange_night)
+        if (e.classtime[i].index % 100 > 10)
+          return;
+      if (!vue_inst.$data.selected.arrange_week)
+        if (e.classtime[i] >= 600)
+          return;
+    }
     r.push(e.subject);
   });
   return r;
@@ -176,16 +215,55 @@ function arrange_recurse(a,b)
   });
   return groups;
 }
+function set_subjects_state(subject, failed)
+{
+  var i = vue_inst.$data.selected.required.length;
+  while(i--)
+  {
+    if (vue_inst.$data.selected.required[i].subject == subject)
+    {
+      vue_inst.$data.selected.required[i].fail = failed;
+      return;
+    }
+  }
+  var i = vue_inst.$data.selected.optional.length;
+  while(i--)
+  {
+    if (vue_inst.$data.selected.optional[i].subject == subject)
+    {
+      Vue.set(vue_inst.$data.selected.optional[i],'fail',failed);
+      return;
+    }
+  }
+}
 function arrange()
 {
-  var subjects = get_selected_subjects();
-  var groups = split_list(find_by_subject(subjects[0]));
+  var requireds = get_selected_subjects(vue_inst.$data.selected.required);
+  var optionals = get_selected_subjects(vue_inst.$data.selected.optional);
+  var confirmed = vue_inst.$data.selected.confirmed;
+  var subjects = merge_array(requireds,optionals);
+  var groups = [merge_array(confirmed,[])];
   for (var i = 1; i < subjects.length; i++)
   {
-    groups = arrange_recurse(groups,split_list(find_by_subject(subjects[i])),true);
+    var c = find_by_subject(subjects[i]);
+    if (!c.length)
+    {
+      set_subjects_state(subjects[i], true);
+      continue;
+    }
+    var t_groups = arrange_recurse(groups,split_list(c),true);
+    if (t_groups.length == 0)
+    {
+      set_subjects_state(subjects[i], true);
+      continue;
+    }
+    else
+      set_subjects_state(subjects[i], false);
+
     //TODO: temporary reduce time cost
-    if (groups.length > 100)
-      groups = groups.splice(0,100);
+    if (t_groups.length > 100)
+      t_groups = t_groups.splice(0,100);
+    groups = t_groups;
   }
   return groups;
 }
