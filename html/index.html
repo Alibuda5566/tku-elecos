@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TKU ELECOS</title>
+  <title>淡江大學排課輔助程式</title>
   <link rel="stylesheet" href="static/style.css">
   <script type="text/javascript" src="static/jquery-3.1.0.min.js"></script>
   <script type="text/javascript" src="static/vue.min.js"></script>
@@ -12,7 +12,15 @@
 </head>
 <body>
   <div id="vue-root">
+    <div class="nav">
+      <div class="title">淡江大學排課輔助程式</div>
+      <div class="info">by <a href="//antnf.com">Anthony Fu</a></div>
+    </div>
     <div class="filters">
+      <div class="title">選擇課程類別/系別：</div>
+      <select disabled>
+        <option selected>105學年</option>
+      </select>
       <select v-model="select_group">
         <option v-for="group in groups" :value="group">${group[1]}</option>
       </select>
@@ -24,8 +32,46 @@
         <option :value="1">第二學期</option>
       </select>
     </div>
+    <div class="courses_list" v-if="select_group && select_dept && select_term != undefined">
+      <div class="actions">
+        <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term)">添加所有</div>
+        <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term,true)">添加必修</div>
+      </div>
+      <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>序號</th>
+              <th>科目</th>
+              <th>年級</th>
+              <th>名稱</th>
+              <th>學分</th>
+              <th>教師</th>
+              <th>課時</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="course in select_dept[2]" v-if="course.term == select_term" :class="{'obligatory': course.obligatory, 'selected': is_selected(course)}">
+              <td class="actions">
+                <div :class="{hidden:is_selected(course,selected.confirmed)}" class="button icon" @click="add_course(course,selected.confirmed)">必選</div>
+                <div :class="{hidden:is_selected(course,selected.required)}" class="button icon" @click="add_course(course,selected.required)" >期望</div>
+                <div :class="{hidden:is_selected(course,selected.optional)}" class="button icon" @click="add_course(course,selected.optional)" >可選</div>
+              </td>
+              <td>${course.no}</td>
+              <td>${course.subject}</td>
+              <td>${GRADES[course.grade]}</td>
+              <td>${course.name}</td>
+              <td>${course.credit}</td>
+              <td>${course.teacher}</td>
+              <td>
+                <span v-for="ct in course.classtime" style="margin:0 0.3em" :style="{opacity:ct.lab?0.5:1}">${ct.index}</span>
+              </td>
+            </tr>
+          </tbody>
+      </table>
+    </div>
     <div class="selected-list">
-      <div class="title" v-if="selected.confirmed.length" style="color: #d68b00;">[${selected.confirmed.length}] 確定課程  <div class="button icon">添加</div></div>
+      <div class="title" v-if="selected.confirmed.length" style="color: #d68b00;">[${selected.confirmed.length}] 必選課程  <div class="button icon">添加</div></div>
       <div class="labels" v-if="selected.confirmed.length">
         <div class="label" v-for="course in selected.confirmed" :id="$index" v-drag-and-drop drop="handle_drop_confirmed">
           ${course.no} | ${course.name}
@@ -46,14 +92,13 @@
           <div class="remove" @click="remove_course(course,selected.optional)">X</div>
         </div>
       </div>
-      <div class="options">
-        <div class="title">排課選項</div>
-        <input type="checkbox" v-model="selected.arrange_weekend">六日排課<br>
-        <input type="checkbox" v-model="selected.arrange_night">夜間排課
-      </div>
       <div>
         <div class="button" @click="arrange_selected()">排課</div>
         <div class="button" @click="clear_selected()">清除所有</div>
+        <div class="options">
+          <input type="checkbox" v-model="selected.arrange_weekend"><div>六日排課</div>
+          <input type="checkbox" v-model="selected.arrange_night"><div>夜間排課</div>
+        </div>
       </div>
     </div>
     <div v-if="arranged.length" class="arranged-list">
@@ -107,44 +152,7 @@
         <div class="button">複製選課序號(Python)</div>
       </div>
     </div>
-    <div class="courses_list" v-if="select_group && select_dept && select_term != undefined">
-      <div class="actions">
-        <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term)">添加所有</div>
-        <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term,true)">添加必修</div>
-      </div>
-      <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>序號</th>
-              <th>科目</th>
-              <th>年級</th>
-              <th>名稱</th>
-              <th>學分</th>
-              <th>教師</th>
-              <th>課時</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="course in select_dept[2]" v-if="course.term == select_term" :class="{'obligatory': course.obligatory, 'selected': is_selected(course)}">
-              <td class="actions">
-                <div :class="{hidden:is_selected(course,selected.confirmed)}" class="button icon" @click="add_course(course,selected.confirmed)">確定</div>
-                <div :class="{hidden:is_selected(course,selected.required)}" class="button icon" @click="add_course(course,selected.required)" >期望</div>
-                <div :class="{hidden:is_selected(course,selected.optional)}" class="button icon" @click="add_course(course,selected.optional)" >可選</div>
-              </td>
-              <td>${course.no}</td>
-              <td>${course.subject}</td>
-              <td>${GRADES[course.grade]}</td>
-              <td>${course.name}</td>
-              <td>${course.credit}</td>
-              <td>${course.teacher}</td>
-              <td>
-                <span v-for="ct in course.classtime" style="margin:0 0.3em" :style="{opacity:ct.lab?0.5:1}">${ct.index}</span>
-              </td>
-            </tr>
-          </tbody>
-      </table>
-    </div>
+
   </div>
 </body>
 <script type="text/javascript" src="static/index.js"></script>

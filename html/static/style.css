@@ -1,10 +1,65 @@
+html, body, div, select, input, td
+{
+  font-family:  Arial, sans-serif, 'Microsoft Yahei UI', '微软雅黑', MingLiU;
+}
+
+a
+{
+  opacity: 0.5;
+  text-decoration: none;
+  color: rgb(0,0,0);
+  cursor: pointer;
+  transition: opacity 0.3s ease-in-out;
+}
+a:hover
+{
+  opacity: 1;
+}
+
+.nav
+{
+  margin: 0.5em;
+  padding: 0.5em;
+}
+.nav .title
+{
+  font-size: 1.4em;
+  font-weight: bold;
+}
+.nav .info
+{
+  opacity: 0.9;
+  font-size: 0.8em;
+}
+
 .courses_list, .selected-list, .filters, .arranged-list
 {
   font-size: 0.8em;
   margin: 0.5em;
   border: 1px solid #ccc;
-  padding: 0.5em;
+  padding: 0.8em;
   border-radius: 0.3em;
+}
+.filters .title
+{
+  margin-bottom: 0.5em;
+}
+.filters select
+{
+  padding: 0.3em 0.6em;
+  vertical-align: top;
+}
+.courses_list table
+{
+  border-collapse: collapse;
+}
+.courses_list tr
+{
+  height: 2em;
+}
+.courses_list td
+{
+  border: 0.5px solid rgba(0,0,0,0.06);
 }
 .courses_list tr.obligatory td:not(.actions)
 {
@@ -31,16 +86,16 @@
 {
   margin-bottom: 1.3em;
   margin-left: 1em;
-  font-size: 0.8em;
+  font-size: 0.9em;
 }
 .selected-list .label
 {
   display: inline-block;
-  padding: 0.3em 0.5em;
+  padding: 0.15em 0.5em;
   background: #fcfcfc;
   border-radius: 0.3em;
-  margin: 0.2em;
-  border: 1px solid rgba(0,0,0,0.05);
+  margin: 0.3em;
+  border: 1px solid rgba(0,0,0,0.1);
 }
 .selected-list .label.red
 {
@@ -59,15 +114,23 @@
   font-weight: bold;
   margin-top: 0.7em;
   margin-left: 1em;
+  margin-bottom: 0.4em;
 }
 .selected-list .options
 {
   display: inline-block;
-  margin: 1em 0.5em;
-  margin-top: 0.3em;
-  border: 1px solid rgba(0,0,0,0.2);
-  border-radius: 0.3em;
-  padding: 0.5em;
+  padding: 0.3em;
+  padding-left: 1em;
+  vertical-align: middle;
+}
+.selected-list .options *
+{
+  vertical-align: middle;
+}
+.selected-list .options div
+{
+  display: inline;
+  margin-right: 1.5em;
 }
 .selected-list .options .title
 {
@@ -127,7 +190,6 @@
 {
   cursor: pointer;
   display: inline-block;
-  font-size: 0.8em;
   padding: 0.3em 1em;
   border-radius: 0.3em;
   border: 1px solid #888;
