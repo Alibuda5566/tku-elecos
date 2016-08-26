@@ -64,6 +64,7 @@
 {
   display: inline-block;
   margin: 1em 0.5em;
+  margin-top: 0.3em;
   border: 1px solid rgba(0,0,0,0.2);
   border-radius: 0.3em;
   padding: 0.5em;
@@ -100,24 +101,26 @@
 {
   border: 0.5px solid rgba(0,0,0,0.06);
   min-width: 4em;
+  padding: 0;
 }
 .arranged-list table .lesson
 {
-  font-size: 0.9em;
-  padding: 0.1em 0.8em;
-  margin: 0.1em;
+  cursor: default;
+  padding: 0.35em 0.8em;
+}
+.arranged-list table .lesson.hover
+{
+  font-weight: bold;
+  background: rgba(0,0,0,0.04);
 }
 .arranged-list table
 {
 
 }
-.arranged-list table.details tr.obligatory
+.arranged-list table.details tr.hover
 {
-
-}
-.arranged-list table.details tr:not(.obligatory)
-{
-
+  background: rgba(0,0,0,0.04);
+  font-weight: bold;
 }
 
 .button

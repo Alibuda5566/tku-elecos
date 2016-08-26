@@ -137,6 +137,9 @@ var vue_inst = new Vue({
       }
       return count;
     },
+    set_hover: function(element, hover) {
+      Vue.set(element,'hover',hover);
+    },
     hashcolor: hashStringToColor
   },
 });
@@ -299,18 +302,11 @@ function group_conflict(a,b,simple)
   return result;
 }
 
-function djb2(str){
-  var hash = 5381;
-  for (var i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
-  }
-  return hash;
-}
-
 function hashStringToColor(str) {
-  var hash = djb2(str.toString());
-  var r = (hash & 0xFF0000) >> 16;
-  var g = (hash & 0x00FF00) >> 8;
-  var b = hash & 0x0000FF;
-  return "#" + ("0" + r.toString(16)).substr(-2) + ("0" + g.toString(16)).substr(-2) + ("0" + b.toString(16)).substr(-2);
+  // str to hash
+  for (var i = 0, hash = 0; i < str.length; hash = str.charCodeAt(i++) + ((hash << 5) - hash));
+  // int/hash to hex
+  for (var i = 0, colour = "#"; i < 3; colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2));
+
+  return colour;
 }

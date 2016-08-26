@@ -68,7 +68,8 @@
             <tr v-for="i in 15">
               <th>${i+1}</th>
               <td v-for="w in 7" :index="(w+1)*100+i+1">
-                <div class="lesson" v-for="l in index_filter(selected_arranged,(w+1)*100+i+1)" :style={color:hashcolor(l.no)}>
+                <div class="lesson" v-for="l in index_filter(selected_arranged,(w+1)*100+i+1)"
+                    :style="{color:hashcolor(l.no)}" :class="{hover:l.hover}" @mouseover="set_hover(l,true)" @mouseout="set_hover(l,false)">
                   ${l.name}
                 </div>
               </td>
@@ -88,11 +89,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="course in selected_arranged" :class="{'obligatory': course.obligatory}">
+            <tr v-for="course in selected_arranged" :style="{color:hashcolor(course.no)}"
+               :class="{hover:course.hover}" @mouseover="set_hover(course,true)" @mouseout="set_hover(course,false)">
               <td>${course.no}</td>
               <td>${course.subject}</td>
               <td>${GRADES[course.grade]}</td>
-              <td>${course.name}</td>
+              <td style="padding: 0 2em; text-align:left;">${course.name}</td>
               <td>${course.credit}</td>
               <td>${course.teacher}</td>
               <td>
