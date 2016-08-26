@@ -24,6 +24,13 @@
       </select>
     </div>
     <div class="selected-list">
+      <div class="title" v-if="selected.confirmed.length">C:確定課程（按順序權重）<div class="button icon">添加</div></div>
+      <div class="labels" v-if="selected.confirmed.length">
+        <div class="label" v-for="course in selected.confirmed" :id="$index" v-drag-and-drop drop="handle_drop">
+          ${course.id} | ${course.name}
+          <div class="remove" @click="remove_course(course,selected.confirmed)">X</div>
+        </div>
+      </div>
       <div class="title" v-if="selected.required.length">R:期望課程（按順序權重）</div>
       <div class="labels" v-if="selected.required.length">
         <div class="label" v-for="course in selected.required" :id="$index" v-drag-and-drop drop="handle_drop">
@@ -84,8 +91,9 @@
           <tbody>
             <tr v-for="course in select_dept[2]" v-if="course.term == select_term" :class="{'obligatory': course.obligatory, 'selected': is_selected(course)}">
               <td class="actions">
-                <div :class="{hidden:is_selected(course,selected.required)}" class="button icon" @click="add_course(course,selected.required)">r</div>
-                <div :class="{hidden:is_selected(course,selected.optional)}" class="button icon" @click="add_course(course,selected.optional)">o</div>
+                <div :class="{hidden:is_selected(course,selected.required)}" class="button icon" @click="add_course(course,selected.confirmed)">確定</div>
+                <div :class="{hidden:is_selected(course,selected.required)}" class="button icon" @click="add_course(course,selected.required)" >期望</div>
+                <div :class="{hidden:is_selected(course,selected.optional)}" class="button icon" @click="add_course(course,selected.optional)" >可選</div>
               </td>
               <td>${course.no}</td>
               <td>${course.subject}</td>
