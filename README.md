@@ -1,6 +1,7 @@
-# TKU-Elecos
-There is not docs for this project. It's only for people who knows how to use it.
+# 淡江大學排課輔助程式
+本程式以網頁形式提供最大化排課方案（完美課表），將在近期于 https://tku.antnf.com 上釋出。此Repo為項目源碼，歡迎PR。
 
-This project is for studying only. The stablility of these scripts can not be guaranteed. Use these may also break the school's rule.
+## 使用
+訪問 [https://tku.antnf.com](https://tku.antnf.com) *（目前暫未開放）*
 
-**Use and take your own risk**.
+注意： **⚠️本程式中數據與結果僅供參考，確切數據請前往學校官網查詢。**
