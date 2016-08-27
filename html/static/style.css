@@ -31,6 +31,48 @@ a:hover
   opacity: 0.9;
   font-size: 0.8em;
 }
+.nav .des
+{
+  margin-top: 0.5em;
+  color: #f46210;
+}
+.nav .note
+{
+  opacity: 0.6;
+  font-size: 0.8em;
+}
+
+.grid
+{
+  display: flex;
+  width: 100%;
+}
+.grid .column
+{
+  flex: 1;
+}
+
+table
+{
+  border-collapse: collapse;
+  width: 98%;
+  margin: 1em auto;
+}
+tr
+{
+  height: 2em;
+}
+td, th
+{
+  border: 1px solid rgba(0,0,0,0.1);
+  min-width: 4em;
+  padding: 0;
+  text-align: center;
+}
+th
+{
+  padding: 0 1em;
+}
 
 .courses_list, .selected-list, .filters, .arranged-list
 {
@@ -48,18 +90,6 @@ a:hover
 {
   padding: 0.3em 0.6em;
   vertical-align: top;
-}
-.courses_list table
-{
-  border-collapse: collapse;
-}
-.courses_list tr
-{
-  height: 2em;
-}
-.courses_list td
-{
-  border: 0.5px solid rgba(0,0,0,0.06);
 }
 .courses_list tr.obligatory td:not(.actions)
 {
@@ -79,7 +109,7 @@ a:hover
 }
 .courses_list .actions
 {
-  text-align: right;
+
 }
 
 .selected-list .labels
@@ -87,6 +117,7 @@ a:hover
   margin-bottom: 1.3em;
   margin-left: 1em;
   font-size: 0.9em;
+  max-width: 500px;
 }
 .selected-list .label
 {
@@ -149,22 +180,6 @@ a:hover
   margin-left: 10em;
   margin-top: 2em;
   font-size: 1.1em;
-}
-.arranged-list table
-{
-  border-collapse: collapse;
-  text-align: center;
-  margin: 1em;
-}
-.arranged-list table tr
-{
-  height: 2em;
-}
-.arranged-list table td
-{
-  border: 0.5px solid rgba(0,0,0,0.06);
-  min-width: 4em;
-  padding: 0;
 }
 .arranged-list table .lesson
 {

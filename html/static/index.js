@@ -118,6 +118,7 @@ var vue_inst = new Vue({
           if (i == 10) console.log('Results more than 10, hidden');
         })*/
       Vue.set(vue_inst.$data,'arranged',g);
+      Vue.set(vue_inst.$data,'selected_arranged',vue_inst.$data.arranged[0]);
     },
     index_filter: function(group, index) {
       var r = [];
@@ -301,12 +302,15 @@ function group_conflict(a,b,simple)
   })
   return result;
 }
-
 function hashStringToColor(str) {
   // str to hash
   for (var i = 0, hash = 0; i < str.length; hash = str.charCodeAt(i++) + ((hash << 5) - hash));
   // int/hash to hex
   for (var i = 0, colour = "#"; i < 3; colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2));
-
   return colour;
 }
+
+$(function() {
+  Vue.set(vue_inst.$data,'select_group',vue_inst.$data.groups[0]);
+  Vue.set(vue_inst.$data,'select_dept',vue_inst.$data.select_group[2][0]);
+})
