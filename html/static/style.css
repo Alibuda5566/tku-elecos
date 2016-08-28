@@ -52,11 +52,17 @@ a:hover
   flex: 1;
 }
 
+
+select
+{
+  padding: 0.3em 0.6em;
+  vertical-align: top;
+}
 table
 {
   border-collapse: collapse;
-  width: 98%;
-  margin: 1em auto;
+  width: 100%;
+  margin: 1em 0;
 }
 tr
 {
@@ -65,7 +71,6 @@ tr
 td, th
 {
   border: 1px solid rgba(0,0,0,0.1);
-  min-width: 4em;
   padding: 0;
   text-align: center;
 }
@@ -82,14 +87,9 @@ th
   padding: 0.8em;
   border-radius: 0.3em;
 }
-.filters .title
+.filters .title, .arranged-list>.title
 {
   margin-bottom: 0.5em;
-}
-.filters select
-{
-  padding: 0.3em 0.6em;
-  vertical-align: top;
 }
 .courses_list tr.obligatory td:not(.actions)
 {

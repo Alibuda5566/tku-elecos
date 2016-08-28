@@ -67,7 +67,7 @@
                   <td style="padding: 0 0.5em; text-align:left;">${course.name}</td>
                   <td>${course.credit}</td>
                   <td>${course.teacher}</td>
-                  <td>
+                  <td style="padding: 0 0.5em; text-align:left;">
                     <span v-for="ct in course.classtime" style="margin:0 0.3em" :style="{opacity:ct.lab?0.5:1}">${ct.index}</span>
                   </td>
                 </tr>
@@ -109,7 +109,7 @@
           </div>
         </div>
         <div v-if="arranged.length" class="arranged-list">
-          <span>共 ${arranged.length} 種組合: </span>
+          <div class="title">共 ${arranged.length} 種組合: </div>
           <select v-model="selected_arranged">
             <option v-for="a in arranged" :value="a">${$index + ' | ' + a.length + '門 | ' + count_credit(a) + '學分' }</option>
           </select>
@@ -149,7 +149,7 @@
                   <td style="padding: 0 2em; text-align:left;">${course.name}</td>
                   <td>${course.credit}</td>
                   <td>${course.teacher}</td>
-                  <td>
+                  <td style="padding: 0 0.5em; text-align:left;">
                     <span v-for="ct in course.classtime" style="margin:0 0.3em" :style="{opacity:ct.lab?0.5:1}">${ct.index}</span>
                   </td>
                 </tr>

@@ -32,6 +32,9 @@ var vue_inst = new Vue({
         storage.save(val);
       },
       deep: true
+    },
+    'select_group': function(){
+      Vue.set(vue_inst.$data,'select_dept',vue_inst.$data.select_group[2][0]);
     }
   },
   methods: {
@@ -312,5 +315,4 @@ function hashStringToColor(str) {
 
 $(function() {
   Vue.set(vue_inst.$data,'select_group',vue_inst.$data.groups[0]);
-  Vue.set(vue_inst.$data,'select_dept',vue_inst.$data.select_group[2][0]);
 })
