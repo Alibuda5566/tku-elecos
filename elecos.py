@@ -133,18 +133,18 @@ def fuck_elecos(student_no,password,adds=[],dels=[],try_times=180,login_interval
         for d in dels:
             try:
                 result, msg, soup = elecos.action("del",d)
-                safeprint(">>>> 退選 [" + str(d) + "] " + msg, color='green' if result else 'red')
+                safeprint(">>> 退選 [" + str(d) + "] " + msg, color='green' if result else 'red')
             except Exception as e:
-                safeprint(str(e))
+                safeprint(">>> ERROR: " + str(e), color='red')
     print()
     if len(adds):
         safeprint('\n========== 開始加選({}) =========='.format(len(adds)), color='yellow')
         for a in adds:
             try:
                 result, msg, soup = elecos.action("add",a)
-                safeprint(">>>> 加選 [" + str(a) + "] " + msg, color='green' if result else 'red')
+                safeprint(">>> 加選 [" + str(a) + "] " + msg, color='green' if result else 'red')
             except Exception as e:
-                safeprint(str(e))
+                safeprint(">>> ERROR: " + str(e), color='red')
 
     print_timetabe(soup)
     safeprint('\n========== 任務完成 程序結束 ==========', back='on_green')
