@@ -109,6 +109,7 @@ def print_timetabe(action_soup):
 def fuck_elecos(student_no,password,adds=[],dels=[],try_times=180,login_interval=0.3):
     safeprint('=== 程序開始', datetime.now().strftime("%Y-%m-%d %H:%M:%S"), '===', color='green')
     elecos = Elecos(student_no, password)
+    soup = None
     for x in range(1,try_times + 1):
         #break # TEST
         try:
@@ -124,7 +125,7 @@ def fuck_elecos(student_no,password,adds=[],dels=[],try_times=180,login_interval
         except Exception as e:
             safeprint(e)
         time.sleep(login_interval)
-    soup = None
+
     if not elecos.is_login:
         safeprint('\n========== 嘗試多次登陸失敗, 程序結束 ==========', color='white', back='on_red')
         return
@@ -133,21 +134,23 @@ def fuck_elecos(student_no,password,adds=[],dels=[],try_times=180,login_interval
         for d in dels:
             try:
                 result, msg, soup = elecos.action("del",d)
-                safeprint(">>> 退選 [" + str(d) + "] " + msg, color='green' if result else 'red')
+                safeprint(">>> 退選[" + str(d) + "]  " + msg, color='green' if result else 'red')
             except Exception as e:
                 safeprint(">>> ERROR: " + str(e), color='red')
-    print()
+        print()
+
     if len(adds):
         safeprint('\n========== 開始加選({}) =========='.format(len(adds)), color='yellow')
         for a in adds:
             try:
                 result, msg, soup = elecos.action("add",a)
-                safeprint(">>> 加選 [" + str(a) + "] " + msg, color='green' if result else 'red')
+                safeprint(">>> 加選[" + str(a) + "]  " + msg, color='green' if result else 'red')
             except Exception as e:
                 safeprint(">>> ERROR: " + str(e), color='red')
+        print()
 
     print_timetabe(soup)
-    safeprint('\n========== 任務完成 程序結束 ==========', back='on_green')
+    safeprint('\n========== 任務完成 程序結束 ==========', color='green')
 
 if __name__ == '__main__':
     import configs as cfg
