@@ -148,6 +148,20 @@ var vue_inst = new Vue({
   },
 });
 
+new Clipboard('#btn_copy', {
+    text: function(trigger) {
+      var ids = []
+      var j = vue_inst.selected_arranged.length
+      for (var i=0;i<j;i++)
+        ids.push(vue_inst.selected_arranged[i].no)
+      var str = ids.join('\n')
+      console.log(str)
+      return str
+    }
+}).on('success', function(e) {
+  alert('複製成功！')
+})
+
 function stringify(obj_list,key,spliter) {
   var str = '';
   spliter = spliter || '';

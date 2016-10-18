@@ -7,6 +7,7 @@
   <script type="text/javascript" src="static/jquery-3.1.0.min.js"></script>
   <script type="text/javascript" src="static/vue.min.js"></script>
   <script type="text/javascript" src="static/vue.drag-and-drop.js"></script>
+  <script type="text/javascript" src="static/clipboard.min.js"></script>
   <script type="text/javascript" src="static/store.js"></script>
   <script type="text/javascript" src="data/courses.json"></script>
 </head>
@@ -23,7 +24,7 @@
         <div class="filters">
           <div class="title">選擇課程類別/系別：</div>
           <select disabled>
-            <option selected>105學年</option>
+            <option selected>105學年 上學期</option>
           </select>
           <select v-model="select_group">
             <option v-for="group in groups" :value="group">${group[1]}</option>
@@ -132,6 +133,7 @@
                   <th>序號</th>
                   <th>科目</th>
                   <th>年級</th>
+                  <th>學期序</th>
                   <th>名稱</th>
                   <th>學分</th>
                   <th>教師</th>
@@ -144,6 +146,7 @@
                   <td>${course.no}</td>
                   <td>${course.subject}</td>
                   <td>${GRADES[course.grade]}</td>
+                  <td>${course.term}</td>
                   <td style="padding: 0 2em; text-align:left;">${course.name}</td>
                   <td>${course.credit}</td>
                   <td>${course.teacher}</td>
@@ -153,8 +156,7 @@
                 </tr>
               <tbody>
             </table>
-            <div class="button">複製選課序號</div>
-            <div class="button">複製選課序號(Python)</div>
+            <div class="button" id="btn_copy">複製選課序號</div>
           </div>
         </div>
       </div>
