@@ -45,9 +45,9 @@ var vue_inst = new Vue({
           return true;
       return false;
     },
-    add_dept: function (dept_data,term,obligatory) {
+    add_dept: function (dept_data,obligatory) {
       $.each(dept_data,function(i,e) {
-        if (e.term == term && (obligatory === undefined || e.obligatory == obligatory))
+        if (obligatory === undefined || e.obligatory == obligatory)
           vue_inst.add_course(e);
       });
     },

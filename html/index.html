@@ -31,15 +31,11 @@
           <select v-if="select_group" v-model="select_dept">
             <option v-for="dept in select_group[2]" :value="dept">${dept[1]}</option>
           </select>
-          <select v-if="select_group" v-model="select_term">
-            <option :value="0" selected>第一學期</option>
-            <option :value="1">第二學期</option>
-          </select>
         </div>
-        <div class="courses_list" v-if="select_group && select_dept && select_term != undefined">
+        <div class="courses_list" v-if="select_group && select_dept">
           <div class="actions">
-            <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term)">添加所有</div>
-            <div v-if="select_dept && select_term != undefined" class="button" @click="add_dept(select_dept[2],select_term,true)">添加必修</div>
+            <div v-if="select_dept" class="button" @click="add_dept(select_dept[2])">添加所有</div>
+            <div v-if="select_dept" class="button" @click="add_dept(select_dept[2],true)">添加必修</div>
           </div>
           <table>
               <thead>
@@ -48,6 +44,7 @@
                   <th>序號</th>
                   <th>科目</th>
                   <th>年級</th>
+                  <th>學期序</th>
                   <th>名稱</th>
                   <th>學分</th>
                   <th>教師</th>
@@ -55,7 +52,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="course in select_dept[2]" v-if="course.term == select_term" :class="{'obligatory': course.obligatory, 'selected': is_selected(course)}">
+                <tr v-for="course in select_dept[2]" :class="{'obligatory': course.obligatory, 'selected': is_selected(course)}">
                   <td class="actions">
                     <div :class="{hidden:is_selected(course,selected.confirmed)}" class="button icon" @click="add_course(course,selected.confirmed)">必選</div>
                     <div :class="{hidden:is_selected(course,selected.required)}" class="button icon" @click="add_course(course,selected.required)" >期望</div>
@@ -64,6 +61,7 @@
                   <td>${course.no}</td>
                   <td>${course.subject}</td>
                   <td>${GRADES[course.grade]}</td>
+                  <td>${course.term}</td>
                   <td style="padding: 0 0.5em; text-align:left;">${course.name}</td>
                   <td>${course.credit}</td>
                   <td>${course.teacher}</td>
